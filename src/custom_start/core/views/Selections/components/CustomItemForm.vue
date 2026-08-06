@@ -101,9 +101,9 @@ const itemQuantity = computed({
 const rarityOptions = RARITY_OPTIONS;
 const categoryOptions = CATEGORY_OPTIONS;
 
-// 根据品质计算点数（使用 0.5-1 之间的随机位置）
+// 根据品质计算点数（使用 0-1 之间的随机位置，显示区间即真实区间）
 const calculatedCost = computed(() => {
-  const randomPosition = 0.5 + Math.random() * 0.5;
+  const randomPosition = Math.random();
   return calculateCostByPosition(itemRarity.value, randomPosition);
 });
 
