@@ -73,26 +73,27 @@ export const generateInitialPoints = (characterName?: string): number => {
   const weight = 3;
   const weightRandom = Math.pow(random, weight);
 
-  const result = Math.floor(1000 + weightRandom * (10000 - 1000 + 1));
+  const result = Math.floor(1000 + weightRandom * (50000 - 1000 + 1));
 
-  return Math.min(result, 10000);
+  return Math.min(result, 50000);
 };
 
 // 初始转生点数（默认值）
-export const INITIAL_REINCARNATION_POINTS = 1000;
+export const INITIAL_REINCARNATION_POINTS = 5000;
 
 // 属性列表
 export const ATTRIBUTES: (keyof Attributes)[] = ['力量', '敏捷', '体质', '智力', '精神'];
 
 // 等级相关常量
-export const MAX_LEVEL = 10;
+// 原版上限 10，放宽至世界书规则上限 25（第七层级）
+export const MAX_LEVEL = 25;
 export const MIN_LEVEL = 1;
 
 // 基础点常量
-/** 基础点总和上限 */
-export const MAX_BASE_POINTS_TOTAL = 25;
-/** 基础点单项上限 */
-export const MAX_BASE_POINTS_PER_ATTR = 6;
+/** 基础点总和上限（原版 25，已放宽） */
+export const MAX_BASE_POINTS_TOTAL = 30;
+/** 基础点单项上限（原版 6，已放宽） */
+export const MAX_BASE_POINTS_PER_ATTR = 10;
 
 /**
  * 根据等级计算可用的【额外】AP点数
