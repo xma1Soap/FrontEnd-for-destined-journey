@@ -91,6 +91,14 @@ const getStairwayView = (partner: Partner) => {
     godKingdom: stairway.godKingdom,
   };
 };
+
+/** 主角登神长阶视图（复用伙伴的渲染逻辑，主角走完整模式） */
+const stairwayView = computed(() =>
+  getStairwayView({
+    isCustom: false,
+    stairway: characterStore.character.stairway || { isOpen: false },
+  } as Partner),
+);
 </script>
 
 <template>
@@ -148,6 +156,84 @@ const getStairwayView = (partner: Partner) => {
             <p><strong>起始地点：</strong>{{ displayLocation }}</p>
             <p><strong>等级：</strong>Lv.{{ characterStore.character.level }}</p>
             <p><strong>金钱：</strong>{{ characterStore.character.money }} G</p>
+          </div>
+        </section>
+
+        <!-- 登神长阶 -->
+        <section v-if="stairwayView.isOpen" class="doc-section">
+          <h3 class="section-title">
+            <i class="fa-solid fa-stairs" aria-hidden="true"></i>
+            <span>登神长阶</span>
+          </h3>
+          <div class="doc-text">
+            <div v-if="stairwayView.elements.length > 0" class="sub-item">
+              <p><strong>要素：</strong></p>
+              <div
+                v-for="element in stairwayView.elements"
+                :key="`element-${element.name}`"
+                class="sub-item"
+              >
+                <p class="sub-item">• {{ element.name }}</p>
+                <p
+                  v-for="effect in element.effects"
+                  :key="`element-${element.name}-${effect.key}`"
+                  class="sub-item"
+                >
+                  • {{ effect.key }}：{{ effect.value }}
+                </p>
+              </div>
+            </div>
+            <div v-if="stairwayView.powers.length > 0" class="sub-item">
+              <p><strong>权能：</strong></p>
+              <div
+                v-for="power in stairwayView.powers"
+                :key="`power-${power.name}`"
+                class="sub-item"
+              >
+                <p class="sub-item">• {{ power.name }}</p>
+                <p
+                  v-for="effect in power.effects"
+                  :key="`power-${power.name}-${effect.key}`"
+                  class="sub-item"
+                >
+                  • {{ effect.key }}：{{ effect.value }}
+                </p>
+              </div>
+            </div>
+            <div v-if="stairwayView.laws.length > 0" class="sub-item">
+              <p><strong>法则：</strong></p>
+              <div
+                v-for="law in stairwayView.laws"
+                :key="`law-${law.name}`"
+                class="sub-item"
+              >
+                <p class="sub-item">• {{ law.name }}</p>
+                <p
+                  v-for="effect in law.effects"
+                  :key="`law-${law.name}-${effect.key}`"
+                  class="sub-item"
+                >
+                  • {{ effect.key }}：{{ effect.value }}
+                </p>
+              </div>
+            </div>
+            <p v-if="stairwayView.godlyRank" class="sub-item">
+              • 神位：{{ stairwayView.godlyRank }}
+            </p>
+            <div
+              v-if="
+                stairwayView.godKingdom?.name || stairwayView.godKingdom?.description
+              "
+              class="sub-item"
+            >
+              <p><strong>神国：</strong></p>
+              <p v-if="stairwayView.godKingdom?.name" class="sub-item">
+                • 名称：{{ stairwayView.godKingdom?.name }}
+              </p>
+              <p v-if="stairwayView.godKingdom?.description" class="sub-item">
+                • 描述：{{ stairwayView.godKingdom?.description }}
+              </p>
+            </div>
           </div>
         </section>
 

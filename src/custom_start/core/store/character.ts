@@ -58,6 +58,7 @@ export const useCharacterStore = defineStore('character', () => {
     reincarnationPoints: INITIAL_REINCARNATION_POINTS, // 转生点数
     destinyPoints: 0, // 命运点数
     money: 0,
+    stairway: { isOpen: false },
   });
 
   // 选择的装备、道具、资产、技能
@@ -172,6 +173,7 @@ export const useCharacterStore = defineStore('character', () => {
       reincarnationPoints: INITIAL_REINCARNATION_POINTS,
       destinyPoints: 0,
       money: 0,
+      stairway: { isOpen: false },
     };
   };
 

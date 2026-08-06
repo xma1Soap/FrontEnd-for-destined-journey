@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import {
   FormCascader,
   FormInput,
+  FormKeyValueInput,
   FormLabel,
   FormNumber,
   FormSelect,
@@ -52,6 +53,107 @@ const levelTierName = computed(() => {
 
   return tierName;
 });
+
+// ===== 登神长阶（第四层级 Lv.13 起） =====
+
+/** 登神长阶是否可用（等级 >= 13） */
+const stairwayAvailable = computed(() => character.value.level >= 13);
+
+/**
+ * 当前等级对应的登神长阶资格提示（世界书规则，仅提示不强制）
+ * Lv.13-16 要素 / Lv.17-20 权能 / Lv.21-24 法则 / Lv.25 神位 / Lv.25巅峰 神国
+ */
+const stairwayEligibility = computed(() => {
+  const level = character.value.level;
+  if (level <= 12) return '';
+  if (level <= 16) return '可拥有：要素 1-3 个';
+  if (level <= 20) return '可拥有：权能 1 个';
+  if (level <= 24) return '可拥有：法则 1 个';
+  if (level === 25) return '可拥有：法则 2 个 + 神位';
+  return '巅峰神明：法则 3 个以上 + 神位 + 神国';
+});
+
+/** 嵌套键值对（名称 -> {效果: 描述}）转扁平（名称 -> 描述） */
+const toFlatStairway = (nested?: Record<string, Record<string, string>>) =>
+  _.fromPairs(
+    _.map(nested || {}, (effects, name) => [
+      name,
+      effects?.['效果'] || _.values(effects || {}).join('；'),
+    ]),
+  );
+
+/** 扁平转嵌套 */
+const toNestedStairway = (flat: Record<string, string>) =>
+  _.fromPairs(_.map(flat, (desc, name) => [name, { 效果: desc }]));
+
+/** 根据内容自动同步 isOpen */
+const syncStairwayOpen = () => {
+  const s = character.value.stairway;
+  if (!s) return;
+  s.isOpen =
+    !_.isEmpty(s.elements) ||
+    !_.isEmpty(s.powers) ||
+    !_.isEmpty(s.laws) ||
+    !!s.godlyRank ||
+    !!s.godKingdom?.name ||
+    !!s.godKingdom?.description;
+};
+
+const stairwayElements = computed({
+  get: () => toFlatStairway(character.value.stairway?.elements),
+  set: (v: Record<string, string>) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    character.value.stairway.elements = toNestedStairway(v);
+  },
+});
+
+const stairwayPowers = computed({
+  get: () => toFlatStairway(character.value.stairway?.powers),
+  set: (v: Record<string, string>) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    character.value.stairway.powers = toNestedStairway(v);
+  },
+});
+
+const stairwayLaws = computed({
+  get: () => toFlatStairway(character.value.stairway?.laws),
+  set: (v: Record<string, string>) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    character.value.stairway.laws = toNestedStairway(v);
+  },
+});
+
+const stairwayGodlyRank = computed({
+  get: () => character.value.stairway?.godlyRank ?? '',
+  set: (v: string) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    character.value.stairway.godlyRank = v;
+  },
+});
+
+const stairwayGodKingdomName = computed({
+  get: () => character.value.stairway?.godKingdom?.name ?? '',
+  set: (v: string) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    if (!character.value.stairway.godKingdom) character.value.stairway.godKingdom = { name: '', description: '' };
+    character.value.stairway.godKingdom.name = v;
+  },
+});
+
+const stairwayGodKingdomDesc = computed({
+  get: () => character.value.stairway?.godKingdom?.description ?? '',
+  set: (v: string) => {
+    if (!character.value.stairway) character.value.stairway = { isOpen: false };
+    if (!character.value.stairway.godKingdom) character.value.stairway.godKingdom = { name: '', description: '' };
+    character.value.stairway.godKingdom.description = v;
+  },
+});
+
+watch(
+  () => character.value.stairway,
+  () => syncStairwayOpen(),
+  { deep: true },
+);
 </script>
 
 <template>
@@ -273,6 +375,73 @@ const levelTierName = computed(() => {
             <span v-if="characterStore.remainingAP > 0"
               >额外点剩余 {{ characterStore.remainingAP }}</span
             >
+          </div>
+        </div>
+      </div>
+
+      <!-- 登神长阶面板（第四层级 Lv.13 起） -->
+      <div v-if="stairwayAvailable" class="stairway-panel">
+        <div class="panel-header">
+          <h3>登神长阶</h3>
+          <span class="tier-hint">Lv.13+ 第四层级起 · {{ stairwayEligibility }}</span>
+        </div>
+        <div class="panel-content">
+          <div class="stairway-grid">
+            <!-- 要素 -->
+            <div class="stairway-section">
+              <FormLabel label="要素" />
+              <FormKeyValueInput
+                v-model="stairwayElements"
+                placeholder-key="要素名称"
+                placeholder-value="效果描述（被动）"
+                add-button-text="添加要素"
+                empty-text="暂无要素"
+              />
+            </div>
+
+            <!-- 权能 -->
+            <div class="stairway-section">
+              <FormLabel label="权能" />
+              <FormKeyValueInput
+                v-model="stairwayPowers"
+                placeholder-key="权能名称"
+                placeholder-value="效果描述（主动）"
+                add-button-text="添加权能"
+                empty-text="暂无权能"
+              />
+            </div>
+
+            <!-- 法则 -->
+            <div class="stairway-section">
+              <FormLabel label="法则" />
+              <FormKeyValueInput
+                v-model="stairwayLaws"
+                placeholder-key="法则名称"
+                placeholder-value="效果描述（主动，每场限1次）"
+                add-button-text="添加法则"
+                empty-text="暂无法则"
+              />
+            </div>
+          </div>
+
+          <div class="stairway-grid">
+            <!-- 神位 -->
+            <div class="stairway-section">
+              <FormLabel label="神位" />
+              <FormInput v-model="stairwayGodlyRank" placeholder="领域统治权 / 解释权，如：镇狱之神" />
+            </div>
+
+            <!-- 神国 -->
+            <div class="stairway-section">
+              <FormLabel label="神国名称" />
+              <FormInput v-model="stairwayGodKingdomName" placeholder="神国名称" />
+              <FormLabel label="神国描述" />
+              <FormTextarea
+                v-model="stairwayGodKingdomDesc"
+                :rows="2"
+                placeholder="神国内近乎绝对掌控，可制定基础规则"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -526,6 +695,69 @@ const levelTierName = computed(() => {
   }
 }
 
+// 登神长阶面板
+.stairway-panel {
+  margin: var(--spacing-lg) 0 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  overflow: hidden;
+
+  .panel-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+
+    h3 {
+      margin: 0;
+      color: var(--title-color);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .tier-hint {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  .panel-content {
+    padding: var(--spacing-lg);
+  }
+
+  .stairway-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .stairway-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    min-width: 0;
+
+    label {
+      font-weight: 600;
+      color: var(--accent-color);
+      font-size: 0.95rem;
+    }
+  }
+}
+
 // 响应式设计
 @media (max-width: 768px) {
   .form-row {
@@ -645,6 +877,33 @@ const levelTierName = computed(() => {
       margin-top: var(--spacing-xs);
       padding: var(--spacing-xs) var(--spacing-sm);
       font-size: 0.82rem;
+    }
+  }
+
+  .stairway-panel {
+    margin-top: var(--spacing-md);
+
+    .panel-header {
+      padding: var(--spacing-xs) var(--spacing-sm);
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      .tier-hint {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+      }
+    }
+
+    .panel-content {
+      padding: var(--spacing-sm);
+    }
+
+    .stairway-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
     }
   }
 }

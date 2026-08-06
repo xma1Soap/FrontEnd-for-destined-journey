@@ -238,6 +238,7 @@ const CharacterFields = [
   'reincarnationPoints',
   'destinyPoints',
   'money',
+  'stairway',
 ] as const;
 
 /** 空属性点模板 */

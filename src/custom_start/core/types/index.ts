@@ -30,6 +30,19 @@ export type Skill = Omit<Item, 'quantity'> & {
   isCustom?: boolean; // 标识是否为自定义数据
 };
 
+// 登神长阶类型（第四层级起，Lv.13+）
+export interface Stairway {
+  isOpen: boolean;
+  elements?: Record<string, Record<string, string>>; // 嵌套键值对：{ "要素名": { "效果名": "效果描述" } }
+  powers?: Record<string, Record<string, string>>; // 嵌套键值对：{ "权能名": { "效果名": "效果描述" } }
+  laws?: Record<string, Record<string, string>>; // 嵌套键值对：{ "法则名": { "效果名": "效果描述" } }
+  godlyRank?: string;
+  godKingdom?: {
+    name: string;
+    description: string;
+  };
+}
+
 // 伙伴类型
 export interface Partner {
   name: string;
@@ -51,17 +64,7 @@ export interface Partner {
     intelligence: number;
     mind: number;
   };
-  stairway: {
-    isOpen: boolean;
-    elements?: Record<string, Record<string, string>>; // 嵌套键值对：{ "要素名": { "效果名": "效果描述" } }
-    powers?: Record<string, Record<string, string>>; // 嵌套键值对：{ "权能名": { "效果名": "效果描述" } }
-    laws?: Record<string, Record<string, string>>; // 嵌套键值对：{ "法则名": { "效果名": "效果描述" } }
-    godlyRank?: string;
-    godKingdom?: {
-      name: string;
-      description: string;
-    };
-  };
+  stairway: Stairway;
   isContract: boolean;
   affinity: number;
   comment?: string;
@@ -117,4 +120,6 @@ export interface CharacterConfig {
   reincarnationPoints: number; // 转生点数
   destinyPoints: number; // 命运点数
   money: number; // 金钱
+  /** 登神长阶（第四层级 Lv.13 起可开启） */
+  stairway?: Stairway;
 }

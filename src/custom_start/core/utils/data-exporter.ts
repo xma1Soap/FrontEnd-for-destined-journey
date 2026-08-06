@@ -181,7 +181,7 @@ export async function writeCharacterToMvu(
     资产: toNamedRecord(assets, toAssetVariable),
     装备: toNamedRecord(equipments, toEquipmentVariable),
     技能: toNamedRecord(skills, toSkillVariable),
-    登神长阶: toAscensionVariable(),
+    登神长阶: toAscensionVariable(character.stairway),
   });
   _.set(mvuData, 'stat_data.关系列表', toNamedRecord(partners, toPartnerVariable));
 
